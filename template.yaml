@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sekeep-api
+
+  sekeep backend!
+
+Globals:
+  Function:
+    Timeout: 5
+
+Parameters:
+  TokenParameter:
+    Type: String
+    Description: Token to validate all requests through API Gateway
+    NoEcho: true
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: ParameterStoreManagement
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:PutParameter
+            - ssm:GetParameter
+            - ssm:DeleteParameter
+            Resource: "*"
+
+  PasswordApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Auth:
+        DefaultAuthorizer: LambdaAuthorizer
+        Authorizers:
+          LambdaAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+            Identity:
+              ReauthorizeEvery: 0
+
+  TokenParameterStore:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: Token to validate all requests through API Gateway
+      Name: sekeep-token
+      Type: String
+      Value: !Ref TokenParameter
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: auth/
+      Handler: auth
+      Runtime: go1.x
+
+  CreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: create/
+      Handler: create
+      Runtime: go1.x
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
+            Path: /password
+            Method: POST
+
+  ReadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: read/
+      Handler: read
+      Runtime: go1.x
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
+            Path: /password
+            Method: GET
+
+  DeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: delete/
+      Handler: delete
+      Runtime: go1.x
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
+            Path: /password
+            Method: DELETE
+
+  UpdateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: update/
+      Handler: update
+      Runtime: go1.x
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
+            Path: /password
+            Method: PATCH
+
+Outputs:
+  CreateAPI:
+    Description: "API Endpoint to store a password in Parameter Store"
+    Value: !Sub "https://${PasswordApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/password/"
