@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	ssmClient ssmiface.SSMAPI
+	ssmClient    ssmiface.SSMAPI
+	seekepPrefix = "/sekeep"
 )
 
 type PasswordError struct {
@@ -35,7 +36,7 @@ func init() {
 func CreateOrUpdate(password model.Password) *PasswordError {
 	log.Infof("createOrUpdate started on password %s", password.Name)
 	_, err := ssmClient.PutParameter(&ssm.PutParameterInput{
-		Name:      aws.String(password.Name),
+		Name:      aws.String(seekepPrefix + password.Name),
 		Value:     aws.String(password.Value),
 		Type:      aws.String("SecureString"),
 		Overwrite: aws.Bool(password.Overwrite)})
@@ -57,7 +58,7 @@ func CreateOrUpdate(password model.Password) *PasswordError {
 func Delete(password model.Password) *PasswordError {
 	log.Infof("delete started on password %s", password.Name)
 	_, err := ssmClient.DeleteParameter(&ssm.DeleteParameterInput{
-		Name: aws.String(password.Name),
+		Name: aws.String(seekepPrefix + password.Name),
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "ParameterNotFound") {
@@ -73,7 +74,7 @@ func Delete(password model.Password) *PasswordError {
 func Read(password model.Password) (string, *PasswordError) {
 	log.Infof("read started on password %s", password.Name)
 	parameter, err := ssmClient.GetParameter(&ssm.GetParameterInput{
-		Name:           aws.String(password.Name),
+		Name:           aws.String(seekepPrefix + password.Name),
 		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
