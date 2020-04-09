@@ -67,7 +67,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: auth/
+      CodeUri: target/
       Handler: auth
       Runtime: go1.x
 
@@ -75,7 +75,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: create/
+      CodeUri: target/
       Handler: create
       Runtime: go1.x
       Events:
@@ -90,7 +90,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: read/
+      CodeUri: target/
       Handler: read
       Runtime: go1.x
       Events:
@@ -105,7 +105,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: delete/
+      CodeUri: target/
       Handler: delete
       Runtime: go1.x
       Events:
@@ -120,7 +120,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: update/
+      CodeUri: target/
       Handler: update
       Runtime: go1.x
       Events:
