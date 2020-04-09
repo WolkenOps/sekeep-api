@@ -74,10 +74,17 @@ Resources:
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Role: !GetAtt LambdaExecutionRole.Arn
       CodeUri: target/
       Handler: auth
       Runtime: go1.x
+      Policies:
+      - Statement:
+        - Sid: GetToken
+          Effect: Allow
+          Action:
+          - ssm:GetParameter
+          Resource: 'arn:aws:ssm:*:*:parameter/sekeep-token'
+
 
   CreateFunction:
     Type: AWS::Serverless::Function
