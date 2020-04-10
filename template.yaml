@@ -113,8 +113,15 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref PasswordApi
+            Path: /password/{name}/
+            Method: GET
+        GetList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
             Path: /password
             Method: GET
+
 
   DeleteFunction:
     Type: AWS::Serverless::Function

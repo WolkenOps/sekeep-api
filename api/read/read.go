@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/WolkenOps/sekeep-api/internal/manager"
 	"github.com/WolkenOps/sekeep-api/internal/model"
 	"github.com/aws/aws-lambda-go/events"
@@ -10,8 +12,25 @@ import (
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	password := model.Password{}
 
-	password.Name = request.QueryStringParameters["name"]
-	value, err := manager.Read(password)
+	if value, ok := request.PathParameters["name"]; ok {
+		password.Name = value
+		value, err := manager.Read(password)
+
+		if err != nil {
+			return events.APIGatewayProxyResponse{
+				StatusCode: err.StatusCode,
+				Body:       err.Message,
+			}, nil
+		}
+
+		return events.APIGatewayProxyResponse{
+			StatusCode: 200,
+			Body:       value,
+		}, nil
+	}
+
+	password.Name = request.QueryStringParameters["filter"]
+	value, err := manager.List(password)
 
 	if err != nil {
 		return events.APIGatewayProxyResponse{
@@ -20,10 +39,12 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 
+	passwords, _ := json.Marshal(value)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
-		Body:       value,
+		Body:       string(passwords),
 	}, nil
+
 }
 
 func main() {
