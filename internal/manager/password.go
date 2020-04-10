@@ -88,3 +88,36 @@ func Read(password model.Password) (string, *PasswordError) {
 	}
 	return *parameter.Parameter.Value, nil
 }
+
+func List(password model.Password) ([]model.Password, *PasswordError) {
+	log.Infof("list started on path %s", password.Name)
+	filter := ssm.ParameterStringFilter{
+		Key:    aws.String("Name"),
+		Option: aws.String("Contains"),
+		Values: aws.StringSlice([]string{string(seekepPrefix + password.Name)}),
+	}
+
+	parameters, err := ssmClient.DescribeParameters(&ssm.DescribeParametersInput{
+		ParameterFilters: []*ssm.ParameterStringFilter{&filter},
+	})
+
+	if err != nil {
+		log.Errorf("list failed on path %s, %s", password.Name, err)
+		return []model.Password{}, &PasswordError{fmt.Sprintf("Internal Error: %s", err), 500, err}
+	}
+
+	log.Debugf("Passwords found: %d", len(parameters.Parameters))
+	var passwords = []model.Password{}
+
+	for _, p := range parameters.Parameters {
+		name := *p.Name
+		newName := strings.Join(remove(strings.Split(name, "/"), 1), "/")
+		passwords = append(passwords, model.Password{Name: newName})
+	}
+
+	return passwords, nil
+}
+
+func remove(slice []string, s int) []string {
+	return append(slice[:s], slice[s+1:]...)
+}
