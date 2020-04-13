@@ -90,6 +90,9 @@ func Read(password model.Password) (string, *PasswordError) {
 }
 
 func List(password model.Password) ([]model.Password, *PasswordError) {
+	if len(password.Name) == 0 {
+		password.Name = "/"
+	}
 	log.Infof("list started on path %s", password.Name)
 	filter := ssm.ParameterStringFilter{
 		Key:    aws.String("Name"),
