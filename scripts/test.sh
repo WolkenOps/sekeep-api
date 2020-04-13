@@ -13,8 +13,10 @@ declare -a data=(
 
 i=0
 name="/work/google/myemail3"
+encoded_name="%2Fwork%2Fgoogle%2Fmyemail3"
 value="mysecretpassword"
 valuen="myotherpassissafer"
+filter="/work/"
 
 
 ### Create a new password
@@ -22,7 +24,7 @@ r=$(curl -s -XPOST -d "{\"name\":\"$name\", \"value\":\"$value\"}" -H "Authoriza
 if [ "$r" = "$name" ] ; then echo "create new password succeeded" ; else echo "create new password failed" ; exit 1 ; fi
 
 ### Get the created password
-r=$(curl -s -XGET -H "Authorization: bearer $token" $url?name=$name)
+r=$(curl -s -XGET -H "Authorization: bearer $token" ${url}${encoded_name}/)
 if [ "$r" = "$value" ] ; then echo "get password succeeded" ; else echo "get password failed" ; exit 1 ; fi
 
 ### Validate that password already exists
@@ -37,6 +39,10 @@ if [ "$r" = "$name" ] ; then echo "update password succeeded" ; else echo "updat
 ### Validate new value
 r=$(curl -s -XGET -H "Authorization: bearer $token" $url?name=$name)
 if [ "$r" = "$valuen" ] ; then echo "validate new password succeeded" ; else echo "validate new password failed" ; exit 1 ; fi
+
+### Get a list of passwords
+r=$(curl -s -XGET -H "Authorization: bearer $token"  "${url}?filter=$filter" | jq ' . | length ')
+if [ "$r" = 1 ] ; then echo "validate password list succeeded" ; else echo "validate password list failed" ; exit 1 ; fi
 
 ### Validate password deletion
 r=$(curl -s -XDELETE -d "{\"name\":\"$name\"}" -H "Authorization: bearer $token" $url)
