@@ -85,7 +85,6 @@ Resources:
           - ssm:GetParameter
           Resource: 'arn:aws:ssm:*:*:parameter/sekeep-token'
 
-
   CreateFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -121,7 +120,6 @@ Resources:
             RestApiId: !Ref PasswordApi
             Path: /password
             Method: GET
-
 
   DeleteFunction:
     Type: AWS::Serverless::Function

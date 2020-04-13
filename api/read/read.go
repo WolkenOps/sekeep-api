@@ -44,7 +44,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		StatusCode: 200,
 		Body:       string(passwords),
 	}, nil
-
 }
 
 func main() {
