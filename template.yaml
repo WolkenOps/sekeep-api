@@ -93,11 +93,11 @@ Resources:
       Handler: create
       Runtime: go1.x
       Events:
-        GetRoot:
+        PostRoot:
           Type: Api
           Properties:
             RestApiId: !Ref PasswordApi
-            Path: /password
+            Path: /passwords
             Method: POST
 
   ReadFunction:
@@ -108,17 +108,17 @@ Resources:
       Handler: read
       Runtime: go1.x
       Events:
-        GetRoot:
-          Type: Api
-          Properties:
-            RestApiId: !Ref PasswordApi
-            Path: /password/{name}/
-            Method: GET
         GetList:
           Type: Api
           Properties:
             RestApiId: !Ref PasswordApi
-            Path: /password
+            Path: /passwords/{name}
+            Method: GET
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PasswordApi
+            Path: /passwords
             Method: GET
 
   DeleteFunction:
@@ -129,11 +129,11 @@ Resources:
       Handler: delete
       Runtime: go1.x
       Events:
-        GetRoot:
+        DeleteRoot:
           Type: Api
           Properties:
             RestApiId: !Ref PasswordApi
-            Path: /password
+            Path: /passwords
             Method: DELETE
 
   UpdateFunction:
@@ -144,14 +144,14 @@ Resources:
       Handler: update
       Runtime: go1.x
       Events:
-        GetRoot:
+        PatchRoot:
           Type: Api
           Properties:
             RestApiId: !Ref PasswordApi
-            Path: /password
+            Path: /passwords
             Method: PATCH
 
 Outputs:
   CreateAPI:
     Description: "API Endpoint to store a password in Parameter Store"
-    Value: !Sub "https://${PasswordApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/password/"
+    Value: !Sub "https://${PasswordApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/passwords/"
