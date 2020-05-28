@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/url"
 
 	"github.com/WolkenOps/sekeep-api/internal/manager"
 	"github.com/WolkenOps/sekeep-api/internal/model"
@@ -13,7 +14,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	password := model.Password{}
 
 	if value, ok := request.PathParameters["name"]; ok {
-		password.Name = value
+		password.Name, _ = url.QueryUnescape(value)
 		value, err := manager.Read(password)
 
 		if err != nil {
